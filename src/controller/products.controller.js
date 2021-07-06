@@ -93,22 +93,54 @@ const updateProduct = async (req, res) => {
     }
 }
 
-const deleteProduct = (req, res)=>{
-    try{
-        Product.findByIdAndRemove(req.params.id).then(product =>{
-            if(product) {
-                return res.status(200).json({success: true, message: 'the product is deleted!'})
-            } else {
-                return res.status(404).json({success: false , message: "product not found!"})
-            }
-        }).catch(err=>{
-           return res.status(500).json({success: false, error: err}) 
-        })
-    }
-    catch (e) {
+const deleteProduct = (req, res) => {
+    try {
+        Product.findByIdAndRemove(req.params.id)
+            .then((product) => {
+                if (product) {
+                    return res.status(200).json({
+                        success: true,
+                        message: 'the product is deleted!',
+                    })
+                } else {
+                    return res
+                        .status(404)
+                        .json({ success: false, message: 'product not found!' })
+                }
+            })
+            .catch((err) => {
+                return res.status(500).json({ success: false, error: err })
+            })
+    } catch (e) {
         res.status(400).send(e)
     }
-   
+}
+
+const CountProduct = async (req, res) => {
+    try {
+        const productCount = await Product.countDocuments((count) => count)
+        if (!productCount) {
+            res.status(500).json({ success: false })
+        }
+        res.send({
+            productCount: productCount,
+        })
+    } catch (e) {
+        res.status(400).send(e)
+    }
+}
+
+const featuredCountProduct = async (req, res) => {
+    try {
+        const count = req.params.count ? req.params.count : 0
+        const products = await Product.find({ isFeatured: true }).limit(+count)
+        if (!products) {
+            res.status(500).json({ success: false })
+        }
+        res.send(products)
+    } catch (e) {
+        res.status(400).send(e)
+    }
 }
 
 module.exports = {
@@ -116,5 +148,7 @@ module.exports = {
     vewProduct,
     addProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    CountProduct,
+    featuredCountProduct
 }
